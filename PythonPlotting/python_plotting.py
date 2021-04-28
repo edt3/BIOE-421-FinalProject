@@ -1,10 +1,15 @@
+#file python_plotting.py
+#author Eric Torres
+#date 28 Apr 2021
+
+# user must set this value to get proper readings!
+time_difference = 1/60  # running at 1 minute, converting to hours
+
 import serial  #pyserial
 import matplotlib.pyplot as plt
 import numpy as np
 import csv
 import datetime
-
-# TODO: add button input to arduino (or python? keyboardinterrupt?) to start measuring
 
 plt.ion()
 fig=plt.figure()
@@ -30,12 +35,25 @@ with open('weight_data.csv', 'w') as fobj:
             data = ser.readline()
             # print(data.decode())
             
-
-            x.append(i)
-            weight_arr.append(float(data.decode()))
+            try:
+                weight_arr.append(float(data.decode()))
+                x.append(i)
+            except ValueError:
+                i -= 1
+                print(data.decode())
+            # print(type(data))
+            # x.append(i)
+            # if type(data) == float:
+            #     weight_arr.append(float(data.decode()))
 
             if (i > 0):
-                rate = weight_arr[i] - weight_arr[i-1]
+                # if(i == 1):
+                #     first_time = datetime.datetime.now()
+                # elif(i == 2):
+                #     second_time = datetime.datetime.now()
+                #     diff_time = second_time - first_time
+
+                rate = (weight_arr[i] - weight_arr[i-1]) / time_difference
                 rate_arr.append(rate)
 
                 # print(x)
@@ -71,8 +89,8 @@ with open('weight_data.csv', 'w') as fobj:
         except KeyboardInterrupt:
             break
     
-    temp = np.average(rate_arr)
-    print(f'Average rate of weight loss = {temp} lb/(time unit)')
+    avg = np.average(rate_arr)
+    print(f'Average rate of weight loss = {avg} lb/hr')
 
 
         # append to a text file!
